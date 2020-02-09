@@ -1,0 +1,418 @@
+{
+	"info": {
+		"_postman_id": "26baa649-12c4-4255-bbee-307ba9db35b4",
+		"name": "Github",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Trigger OTP code",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "c3917f66-399f-4b66-a2d9-13f018e9c08a",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "29762540-7548-4fed-946a-f12d774071e8",
+						"exec": [
+							"",
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{githubpass}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{githubusername}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "key",
+						"value": "Content-Type",
+						"type": "text"
+					},
+					{
+						"key": "name",
+						"value": "Content-Type",
+						"type": "text"
+					},
+					{
+						"key": "value",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.github.com/authorizations",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"authorizations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get SMS",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "040afd10-2b5d-4587-b4e9-7cf2b721b35d",
+						"exec": [
+							"",
+							"",
+							"const response = pm.response.json();",
+							"",
+							"const otp = response.messages[0].body.substring(0,6);",
+							"",
+							"pm.globals.set('otpCode', otp);",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{twilioToken}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{twillioKey}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Otp",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "https://api.twilio.com/2010-04-01/Accounts/:account/Messages.json",
+					"protocol": "https",
+					"host": [
+						"api",
+						"twilio",
+						"com"
+					],
+					"path": [
+						"2010-04-01",
+						"Accounts",
+						":account",
+						"Messages.json"
+					],
+					"variable": [
+						{
+							"key": "account",
+							"value": "{{twilioAccount}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create repo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "26aae797-82a2-4d02-bd1f-253a8810d2da",
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"pm.response.to.have.status(201);",
+							"});",
+							"const response = pm.response.json();",
+							"",
+							"// Save the repo name\",",
+							"pm.globals.set(\"repoName\", response.name);",
+							"",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "bd5c68ee-8103-4503-8519-fc30b8ea513b",
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{githubpass}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{githubusername}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					},
+					{
+						"key": "X-GitHub-OTP",
+						"value": "{{otpCode}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Postman 2FA Github - Twilio\",\r\n  \"description\": \"Using Twilio API read SMS code sent by Github. Integrate the Twilio API request in the creating Github repo\",\r\n  \"homepage\": \"https://github.com\",\r\n  \"private\": false,\r\n  \"has_issues\": true,\r\n  \"has_projects\": true,\r\n  \"has_wiki\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://api.github.com/user/repos",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"user",
+						"repos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Repo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "428c2c5d-0c7c-43a7-93c5-8345307cdc0b",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.github.com/repos/:owner/:repo",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"repos",
+						":owner",
+						":repo"
+					],
+					"variable": [
+						{
+							"key": "owner",
+							"value": "{{githubusername}}"
+						},
+						{
+							"key": "repo",
+							"value": "Selenium-Zavrsni-projekat"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Repo",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "38e033ca-bff4-40b0-9c63-6d15d4ed50c9",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{githubpass}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{githubusername}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "X-GitHub-OTP",
+						"value": "{{otpCode}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://api.github.com/repos/:owner/:repo",
+					"protocol": "https",
+					"host": [
+						"api",
+						"github",
+						"com"
+					],
+					"path": [
+						"repos",
+						":owner",
+						":repo"
+					],
+					"variable": [
+						{
+							"key": "owner",
+							"value": "{{githubusername}}"
+						},
+						{
+							"key": "repo",
+							"value": "{{repoName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "79167b5e-f09b-477f-873b-5b20f6cd7e88",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "bf00018f-2dfd-4d6b-a101-cc996f50d164",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "4fcbb141-528b-49a2-936f-e3b5fe115080",
+			"key": "twillioKey",
+			"value": "SKce1ce6e77f619ae936badfdf1aa89887",
+			"type": "string"
+		},
+		{
+			"id": "d69c613b-2ed8-4e1e-bd0a-9d5dcd94c2aa",
+			"key": "twilioToken",
+			"value": "jRieI3YpIHsqZWwVnFceuwJFE61Ac0Ji",
+			"type": "string"
+		},
+		{
+			"id": "99007e1a-5fef-4867-8e0d-799968df906d",
+			"key": "gituser",
+			"value": "{{githubusername}}",
+			"type": "string"
+		},
+		{
+			"id": "c0b8f4fd-e8ff-4d77-9253-8efb1fb70def",
+			"key": "gitpass",
+			"value": "{{githubpass}}",
+			"type": "string"
+		},
+		{
+			"id": "89a3c89e-c1b4-4aad-a98f-d052e416c160",
+			"key": "twilioAccount",
+			"value": "AC5976977bf1643b07b5c5c5161e6bed6e",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
